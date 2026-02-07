@@ -284,8 +284,36 @@ def main():
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
+    # Quick question buttons (only show when no conversation yet)
+    if len(st.session_state.messages) == 1:
+        st.markdown("**Quick questions — tap to ask:**")
+        sample_questions = [
+            "How do I make Egusi soup?",
+            "Give me the recipe for Efo Riro",
+            "How to prepare Afang soup",
+            "What is Ofe Nsala (White Soup)?",
+            "What soups are from Edo State?",
+            "How do I cook Jollof Rice?",
+            "What is Banga soup and how do I make it?",
+            "Give me a recipe for Ogbono soup",
+        ]
+        cols = st.columns(2)
+        for i, question in enumerate(sample_questions):
+            if cols[i % 2].button(question, key=f"sample_{i}", use_container_width=True):
+                st.session_state.pending_question = question
+                st.rerun()
+
+    # Check for pending question from button click
+    prompt = None
+    if "pending_question" in st.session_state:
+        prompt = st.session_state.pending_question
+        del st.session_state.pending_question
+
     # Chat input
-    if prompt := st.chat_input("Ask me about any Nigerian dish..."):
+    if typed_prompt := st.chat_input("Ask me about any Nigerian dish..."):
+        prompt = typed_prompt
+
+    if prompt:
         # Display user message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
